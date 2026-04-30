@@ -27,6 +27,40 @@ res = await skill.synthesize(
 print(res["audio_base64"][:50], "...")  # Base64エンコード済みWAV
 ```
 
+### CLI コマンドライン使用方法
+インストール後、`tts-plugin-bridge` コマンドが利用可能になります。
+
+#### 利用可能なプラグイン一覧表示
+```bash
+tts-plugin-bridge list
+```
+
+#### テキストから音声合成
+```bash
+tts-plugin-bridge synthesize "こんにちは、世界"
+```
+
+#### オプション付き音声合成
+```bash
+tts-plugin-bridge synthesize "こんにちは、世界" \
+    --engine piperplus \
+    --speed 1.2 \
+    --volume 1.0 \
+    --output ./output.wav
+```
+
+#### TTS接続テスト
+```bash
+tts-plugin-bridge test
+tts-plugin-bridge test --engine piperplus --server-url http://localhost:5000
+```
+
+#### ヘルプ表示
+```bash
+tts-plugin-bridge --help
+tts-plugin-bridge synthesize --help
+```
+
 ## 🔧 プラグイン開発者向け
 独自のTTSエンジンをプラグイン化するには、`pyproject.toml` にエントリーポイントを定義するだけです。
 詳細は各プラグインリポジトリのドキュメントを参照してください。
