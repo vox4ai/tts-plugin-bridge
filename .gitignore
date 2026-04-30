@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+.venv/
+venv/
+ENV/
+
+# IDE
+.idea/
+.vscode/
+
+# Build
+build/
+dist/
+
+# Cache
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+
+# Logs
+*.log
+
+# Environment variables
+.env
+.env.local
+
+# Lock files
+uv.lock
