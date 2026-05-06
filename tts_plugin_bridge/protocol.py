@@ -1,6 +1,31 @@
 from abc import ABC, abstractmethod
 from typing import ClassVar, Optional
 from pydantic import BaseModel, Field
+from dataclasses import dataclass
+from enum import Enum
+
+class ChunkStrategy(Enum):
+    SENTENCE = "sentence"      # 句点(。！？)で分割
+    CHARACTER_COUNT = "char"   # 文字数で分割
+    HYBRID = "hybrid"          # 原則sentence、max_chars超えりでchar分割
+    PAUSE_MARKERS = "pause"    # 「、」など一時停止マーカーで分割
+
+@dataclass
+class ChunkConfig:
+    strategy: ChunkStrategy = ChunkStrategy.HYBRID
+    max_chars: int = 100       # HYBRID/CHARACTER_COUNT時
+    max_duration_sec: float = 30.0  # 目標最長時間
+    min_chars: int = 10        # 最小文字数（短すぎる分割を防ぐ）
+    preserve_punctuation: bool = True  # 句読点を保持するか
+
+@dataclass
+class ChunkResult:
+    """分割されたテキストの情報を保持するクラス"""
+    text: str
+    index: int
+    char_count: int
+    is_partial: bool = False   # 文の途中での分割
+    original_sentence: str = ""  # 分割元の文（HYBRID時）
 
 class TTSRequest(BaseModel):
     """全エンジン共通のリクエストモデル"""
@@ -10,6 +35,8 @@ class TTSRequest(BaseModel):
     volume: Optional[float] = Field(default=1.0, ge=0.0, le=3.0, description="音量倍率")
     model: Optional[str] = Field(default=None, description="エンジン固有モデル名")
     output_format: str = Field(default="wav", description="出力フォーマット")
+    chunk: bool = Field(default=False, description="テキスト分割を有効にするか")
+    chunk_config: Optional[ChunkConfig] = Field(default=None, description="分割の設定")
     extra: dict = Field(default_factory=dict, description="エンジン固有パラメータ")
 
 class TTSResponse(BaseModel):
