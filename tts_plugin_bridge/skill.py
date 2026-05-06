@@ -2,7 +2,7 @@ import base64
 import argparse
 import sys
 import asyncio
-from .protocol import TTSRequest, TTSResponse, TTSConnector
+from .protocol import TTSRequest, TTSResponse, TTSConnector, ChunkConfig
 from .factory import ConnectorFactory
 from typing import Optional
 
@@ -36,6 +36,8 @@ class TTSSkill:
         speed: float = 1.0,
         volume: Optional[float] = None,
         engine: Optional[str] = None,
+        chunk: bool = False,
+        chunk_config: Optional[ChunkConfig] = None,
         **kwargs
     ) -> dict:
         target = engine or self.default_engine
@@ -44,11 +46,38 @@ class TTSSkill:
         if not await connector.is_available():
             return {"status": "error", "message": f"{connector.name} server not reachable"}
 
+        if chunk:
+            from .chunker import HybridChunker, ChunkConfig as ChunkerConfig
+            actual_config = chunk_config or ChunkerConfig()
+            chunker = HybridChunker()
+            chunks_to_process = chunker.chunk(text, actual_config)
+
+            combined_audio = bytearray()
+            for chunk_res in chunks_to_process:
+                req = TTSRequest(
+                    text=chunk_res.text, speed=speed, volume=volume,
+                    extra={k: v for k, v in kwargs.items() if k in connector.get_supported_params()}
+                )
+                res: TTSResponse = await connector.synthesize(req)
+                if not res.success:
+                    return {"status": "error", "message": f"Error in chunk {chunk_res.index}: {res.error}"}
+                if res.audio_data:
+                    combined_audio.extend(res.audio_data)
+
+            if not combined_audio:
+                return {"status": "error", "message": "No audio data was generated"}
+
+            return {
+                "status": "ok",
+                "engine": connector.name,
+                "audio_base64": base64.b64encode(combined_audio).decode(),
+                "message": f"TTS synthesis completed ({len(chunks_to_process)} chunks)"
+            }
+
         req = TTSRequest(
             text=text, speed=speed, volume=volume,
             extra={k: v for k, v in kwargs.items() if k in connector.get_supported_params()}
         )
-
         res: TTSResponse = await connector.synthesize(req)
 
         if res.success:
@@ -82,7 +111,7 @@ async def _main_async():
     subparsers = parser.add_subparsers(dest='command', help='利用可能なコマンド')
     
     # list コマンド
-    list_parser = subparsers.add_parser('list', help='利用可能なTTSプラグインを一覧表示')
+    subparsers.add_parser('list', help='利用可能なTTSプラグインを一覧表示')
     
     # synthesize コマンド
     synth_parser = subparsers.add_parser('synthesize', help='テキストを音声合成')
@@ -93,6 +122,7 @@ async def _main_async():
     synth_parser.add_argument('--pitch', '-p', type=float, help='ピッチ補正 (エンジン依存)')
     synth_parser.add_argument('--output', '-o', help='出力ファイルパス (指定しない場合はBase64を表示)')
     synth_parser.add_argument('--server-url', help='TTSサーバーURL (例: http://localhost:5000)')
+    synth_parser.add_argument('--chunk', action='store_true', help='テキスト分割を有効にする')
     
     # test コマンド
     test_parser = subparsers.add_parser('test', help='TTS接続をテスト')
@@ -113,7 +143,7 @@ async def _main_async():
     if args.command == 'list':
         return await list_engines()
     elif args.command == 'synthesize':
-        return await synthesize_text(args.text, getattr(args, 'engine', None), args.speed, getattr(args, 'volume', None), getattr(args, 'pitch', None), getattr(args, 'output', None), engine_kwargs)
+        return await synthesize_text(args.text, getattr(args, 'engine', None), args.speed, getattr(args, 'volume', None), getattr(args, 'pitch', None), getattr(args, 'output', None), engine_kwargs, args.chunk)
     elif args.command == 'test':
         return await test_connection(getattr(args, 'engine', None), engine_kwargs)
     else:
@@ -144,7 +174,7 @@ async def list_engines():
 
 
 async def synthesize_text(text: str, engine: Optional[str], speed: float, volume: Optional[float], 
-                         pitch: Optional[float], output: Optional[str], engine_kwargs: dict):
+                         pitch: Optional[float], output: Optional[str], engine_kwargs: dict, chunk: bool = False, chunk_config: Optional[ChunkConfig] = None):
     """テキストを音声合成"""
     try:
         async with TTSSkill(default_engine=engine or "piperplus", **engine_kwargs) as skill:
@@ -153,6 +183,9 @@ async def synthesize_text(text: str, engine: Optional[str], speed: float, volume
                 kwargs['volume'] = volume
             if pitch is not None:
                 kwargs['pitch'] = pitch
+            if chunk:
+                kwargs['chunk'] = True
+                kwargs['chunk_config'] = chunk_config
                 
             result = await skill.synthesize(
                 text=text,
@@ -199,7 +232,7 @@ async def test_connection(engine: Optional[str], engine_kwargs: dict):
             )
             
             if result["status"] == "ok":
-                print(f"✅ 接続成功!")
+                print("✅ 接続成功!")
                 print(f"エンジン: {result['engine']}")
                 print(f"メッセージ: {result['message']}")
             else:
