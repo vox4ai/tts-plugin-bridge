@@ -10,12 +10,15 @@ requires-python = ">=3.10"
 dependencies = [
     "pydantic>=2.0",
     "pydantic-settings>=2.0",
+    "tts-plugin-aivisspeech",
+    "tts-plugin-edgetts",
 ]
 readme = "README.md"
 license = {text = "MIT"}
 
 [project.scripts]
 tts-plugin-bridge = "tts_plugin_bridge.skill:main"
+vox4ai = "tts_plugin_bridge.skill:vox4ai_main"
 
 [dependency-groups]
 dev = [
@@ -23,5 +26,9 @@ dev = [
     "pytest-asyncio>=1.3.0",
     "ruff>=0.15.12",
 ]
+
+[tool.uv.sources]
+tts-plugin-aivisspeech = { path = "../tts-plugin-aivisspeech" }
+tts-plugin-edgetts = { path = "../tts-plugin-edgetts" }
 
 
