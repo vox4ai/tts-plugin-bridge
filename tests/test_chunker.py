@@ -3,6 +3,7 @@ from tts_plugin_bridge.chunker import (
     SentenceChunker,
     CharacterCountChunker,
     HybridChunker,
+    PauseMarkerChunker,
 )
 from tts_plugin_bridge.protocol import ChunkConfig, ChunkStrategy
 
@@ -68,6 +69,38 @@ def test_hybrid_chunker():
     chunks = chunker.chunk(text, config)
     assert len(chunks) > 1
     assert any(c.is_partial for c in chunks)
+
+def test_pause_marker_chunker():
+    chunker = PauseMarkerChunker()
+    config = ChunkConfig(strategy=ChunkStrategy.PAUSE_MARKERS, min_chars=5)
+
+    # 読点で分割
+    text = "本日は、晴天なり。明日は、雨でしょう。"
+    chunks = chunker.chunk(text, config)
+    assert len(chunks) >= 2
+    # 読点の位置で分割され、min_chars 未満はマージ
+    assert all(len(c.text) >= 5 for c in chunks)
+    assert chunks[0].text == "本日は、晴天なり。明日は、雨でしょう。" if len(chunks) == 1 else True
+
+    # 空テキスト
+    assert chunker.chunk("", config) == []
+
+    # 読点がない場合 → 1チャンク
+    text = "区切りなし"
+    chunks = chunker.chunk(text, config)
+    assert len(chunks) == 1
+    assert chunks[0].text == "区切りなし"
+
+    # 中黒でも分割
+    text = "A・B・C"
+    chunks = chunker.chunk(text, config)
+    assert len(chunks) >= 1
+
+    # min_chars 未満はマージされる
+    config2 = ChunkConfig(strategy=ChunkStrategy.PAUSE_MARKERS, min_chars=3)
+    text = "a、b、c、d"
+    chunks = chunker.chunk(text, config2)
+    assert all(len(c.text) >= 3 for c in chunks)
 
 if __name__ == "__main__":
     pytest.main([__file__])

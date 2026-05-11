@@ -9,6 +9,21 @@ TTSエンジンのプラグイン化・動的発見・Agent連携を可能にす
 - 🛡️ **型安全**: Pydantic ベースのリクエスト/レスポンスでバリデーション自動実行
 - 🎤 **vox4ai CLI**: 統一インターフェースの `vox4ai` コマンドを同梱（say/save/list/test + 環境診断）
 
+## 🧩 TTS Engine プラグイン
+
+各 TTS Engine は独立したプラグインとして提供されます。
+`uv add tts-plugin-<name>` で導入するだけです。
+
+| プラグイン | リポジトリ | バックエンド | 特徴 |
+|---|---|---|---|
+| **tts-plugin-edgetts** | [vox4ai/tts-plugin-edgetts](https://github.com/vox4ai/tts-plugin-edgetts) | [edge-tts](https://github.com/rany2/edge-tts) (Microsoft Edge TTS) | ローカルサーバー不要・APIキー不要・すぐ使える・多言語・ffplayストリーミング再生 |
+| **tts-plugin-aivisspeech** | [vox4ai/tts-plugin-aivisspeech](https://github.com/vox4ai/tts-plugin-aivisspeech) | [AivisSpeech Engine](https://github.com/AivisProject/AivisSpeech-Engine) | VOICEVOX互換API・日本語高品質・Docker運用・複数話者・WAV出力 |
+| **tts-plugin-kokoro** | [vox4ai/tts-plugin-kokoro](https://github.com/vox4ai/tts-plugin-kokoro) | [kokoro](https://github.com/hexgrad/kokoro) (ローカル推論) | 完全オフライン・espeak-ng必要・モデル別途DL・ローカル音声合成 |
+| **tts-plugin-piperplus** | [vox4ai/tts-plugin-piperplus](https://github.com/vox4ai/tts-plugin-piperplus) | [Piper](https://github.com/rhasspy/piper) / Piper Plus HTTP Server | 軽量・Raspberry Piでも動作・ローカルHTTPサーバー |
+| **tts-plugin-voisonatalk** | [vox4ai/tts-plugin-voisonatalk](https://github.com/vox4ai/tts-plugin-voisonatalk) | [VoiSona Talk Editor](https://resource.voisona.com/) (REST API) | 歌声・読み上げ対応・Windows/Mac・BasicAuth認証・直接スピーカー出力 |
+
+> 全て `uv add tts-plugin-<name>` で bridge プロジェクトに追加できます。`vox4ai list` で導入済みプラグインを確認できます。
+
 ## 📦 インストール
 ```bash
 uv add tts-plugin-bridge
@@ -122,78 +137,6 @@ vox4ai say --help        # say サブコマンドのヘルプ
 vox4ai save --help       # save サブコマンドのヘルプ
 ```
 
----
-
-### tts-plugin-bridge CLI（後方互換）
-
-`tts-plugin-bridge` コマンドも引き続き利用可能です。
-
-#### 利用可能なプラグイン一覧表示
-```bash
-tts-plugin-bridge list
-```
-
-#### テキストから音声合成
-```bash
-tts-plugin-bridge synthesize "こんにちは、世界"
-```
-
-#### オプション付き音声合成
-```bash
-tts-plugin-bridge synthesize "こんにちは、世界" \
-    --engine piperplus \
-    --speed 1.2 \
-    --volume 1.0 \
-    --output ./output.wav
-
-# AivisSpeech Engine の場合（--style-id が必須）
-tts-plugin-bridge synthesize "こんにちは" \
-    --engine aivisspeech \
-    --server-url http://localhost:10101 \
-    --style-id 888753760 \
-    --output hello.wav
-
-# 直接再生（Linux の場合 paplay / aplay が必要）
-tts-plugin-bridge synthesize "こんにちは" \
-    --engine aivisspeech \
-    --server-url http://localhost:10101 \
-    --style-id 888753760 \
-    --play
-```
-
-#### 直接再生（play）
-Edge TTS のようにストリーミング再生に対応したエンジンでは `ffplay` 経由で即時再生します。
-その他のエンジンは `paplay` / `aplay` で全取得後に再生します。
-
-```bash
-# デフォルトエンジンで再生
-tts-plugin-bridge play "こんにちは、世界"
-
-# Edge TTS（ストリーミング再生）
-tts-plugin-bridge play "こんにちは" -e edgetts
-
-# 話速・音量・声指定
-tts-plugin-bridge play "Hello" -e edgetts --speed 1.5 --model en-US-AndrewNeural
-
-# AivisSpeech Engine
-tts-plugin-bridge play "こんにちは" --engine aivisspeech --server-url http://localhost:10101 --style-id 888753760
-```
-
-#### TTS接続テスト
-```bash
-tts-plugin-bridge test
-tts-plugin-bridge test --engine piperplus --server-url http://localhost:5000
-
-# AivisSpeech Engine の場合
-tts-plugin-bridge test --engine aivisspeech --server-url http://localhost:10101 --style-id 888753760
-```
-
-#### ヘルプ表示
-```bash
-tts-plugin-bridge --help
-tts-plugin-bridge synthesize --help
-```
-
 ## 🔧 プラグイン開発者向け
 独自のTTSエンジンをプラグイン化するには、`pyproject.toml` にエントリーポイントを定義するだけです。
 詳細は各プラグインリポジトリのドキュメントを参照してください。
@@ -202,12 +145,9 @@ tts-plugin-bridge synthesize --help
 
 - **OS**: Windows 11 + WSL2 (Ubuntu)
 - **確認日**: 2026-05-09
-- **確認プラグイン**: tts-plugin-aivisspeech (v1.2.0), tts-plugin-edgetts (edge-tts v7.2.8), tts-plugin-kokoro
+- **確認プラグイン**: aivisspeech (Engine v1.2.0), edgetts (edge-tts v7.2.8), kokoro
 - **確認内容**:
   - `vox4ai say` / `save` / `list` / `test` / `--doctor` / `--commands` 全動作確認
-  - `tts-plugin-bridge` CLI 後方互換維持
-  - AivisSpeech: synthesize --style-id → WAV出力 (44100Hz), play → paplay再生
-  - Edge TTS: play → ffplay ストリーミング再生, synthesize → MP3出力
   - 全ユニットテストパス: bridge 11件, aivisspeech 16件, edgetts 22件
 
 ## 📜 ライセンス

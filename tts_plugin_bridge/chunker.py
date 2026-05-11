@@ -91,6 +91,33 @@ class HybridChunker:
         return final_results
 
 class PauseMarkerChunker:
-    """読点や一時停止マーカーで分割"""
     def chunk(self, text: str, config: ChunkConfig) -> List[ChunkResult]:
-        return []
+        if not text:
+            return []
+
+        _split_re = re.compile(r"[、，・,; 　]+")
+        parts = _split_re.split(text)
+        parts = [p.strip() for p in parts if p.strip()]
+        if not parts:
+            return [ChunkResult(text=text, index=0, char_count=len(text))]
+
+        merged: list[str] = []
+        for p in parts:
+            if merged and len(merged[-1]) < config.min_chars:
+                merged[-1] += p
+            else:
+                merged.append(p)
+
+        if merged and len(merged) > 1 and len(merged[-1]) < config.min_chars:
+            tail = merged.pop()
+            merged[-1] += tail
+
+        results = []
+        for idx, chunk in enumerate(merged):
+            results.append(ChunkResult(
+                text=chunk,
+                index=idx,
+                char_count=len(chunk),
+                is_partial=(idx < len(merged) - 1),
+            ))
+        return results

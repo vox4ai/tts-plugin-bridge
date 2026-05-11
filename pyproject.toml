@@ -18,7 +18,6 @@ license = {text = "MIT"}
 
 [project.scripts]
 tts-plugin-bridge = "tts_plugin_bridge.skill:main"
-vox4ai = "tts_plugin_bridge.skill:vox4ai_main"
 
 [dependency-groups]
 dev = [
@@ -30,5 +29,6 @@ dev = [
 [tool.uv.sources]
 tts-plugin-aivisspeech = { path = "../tts-plugin-aivisspeech" }
 tts-plugin-edgetts = { path = "../tts-plugin-edgetts" }
+vox4ai = { path = "../vox4ai", editable = true }
 
 
