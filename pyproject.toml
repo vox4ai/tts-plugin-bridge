@@ -12,6 +12,7 @@ dependencies = [
     "pydantic-settings>=2.0",
     "tts-plugin-aivisspeech",
     "tts-plugin-edgetts",
+    "vox4ai-skill",
 ]
 readme = "README.md"
 license = {text = "MIT"}
@@ -30,5 +31,6 @@ dev = [
 tts-plugin-aivisspeech = { path = "../tts-plugin-aivisspeech" }
 tts-plugin-edgetts = { path = "../tts-plugin-edgetts" }
 vox4ai = { path = "../vox4ai", editable = true }
+vox4ai-skill = { path = "../vox4ai-skill", editable = true }
 
 
