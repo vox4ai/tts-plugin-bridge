@@ -6,6 +6,6 @@ __all__ = ["TTSRequest", "TTSResponse", "TTSConnector", "ConnectorFactory", "TTS
 
 def __getattr__(name):
     if name == "TTSSkill":
-        import vox4ai_skill  # noqa: F811
-        return vox4ai_skill.TTSSkill
+        import vox4ai_skill_lib  # noqa: F811
+        return vox4ai_skill_lib.TTSSkill
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

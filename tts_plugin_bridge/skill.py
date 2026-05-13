@@ -1,8 +1,8 @@
 import argparse
 import asyncio
 
-from vox4ai_skill import TTSSkill  # noqa: F401 — re-exported for backward compat
-from vox4ai_skill.api import list_engines, synthesize_text, play_text, test_connection
+from vox4ai_skill_lib import TTSSkill  # noqa: F401 — re-exported for backward compat
+from vox4ai_skill_lib.api import list_engines, synthesize_text, play_text, test_connection
 
 
 
