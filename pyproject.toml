@@ -10,8 +10,6 @@ requires-python = ">=3.10"
 dependencies = [
     "pydantic>=2.0",
     "pydantic-settings>=2.0",
-    "tts-plugin-aivisspeech",
-    "tts-plugin-edgetts",
     "vox4ai-skill-lib",
 ]
 readme = "README.md"
@@ -28,8 +26,6 @@ dev = [
 ]
 
 [tool.uv.sources]
-tts-plugin-aivisspeech = { path = "../tts-plugin-aivisspeech" }
-tts-plugin-edgetts = { path = "../tts-plugin-edgetts" }
 vox4ai = { path = "../vox4ai", editable = true }
 vox4ai-skill-lib = { path = "../vox4ai-skill-lib", editable = true }
 
