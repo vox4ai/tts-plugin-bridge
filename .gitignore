@@ -30,3 +30,6 @@ dist/
 
 # Lock files
 uv.lock
+
+# Generated
+GEMINI.md
