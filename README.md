@@ -1,8 +1,29 @@
 # tts-plugin-bridge
 
+<p align="center">
+  <img src="https://via.placeholder.com/1200x400/1a1a1a/ffffff?text=tts-plugin-bridge" alt="tts-plugin-bridge Banner" width="1200">
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/pypi-latest-blue.svg" alt="PyPI version">
+  <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License">
+  <img src="https://img.shields.io/badge/python-3.10%2B-yellow.svg" alt="Python Version">
+  <img src="https://img.shields.io/badge/maintained%3F-yes-brightgreen.svg" alt="Maintained">
+</p>
+
+<p align="center">
+  <a href="https://github.com/vox4ai/tts-plugin-bridge">Website</a> •
+  <a href="https://github.com/vox4ai/tts-plugin-bridge/issues">Report Bug</a> •
+  <a href="https://github.com/vox4ai/tts-plugin-bridge/contributing">Contributing</a>
+</p>
+
+---
+
+## 🚀 Overview
+
 TTSエンジンのプラグイン化・動的発見・Agent連携を可能にするコアフレームワークです。
 
-## ✨ 特徴
+### ✨ 特徴
 - 🔌 **Entry Points による自動発見**: `uv add tts-plugin-xxx` するだけで自動的にブリッジへ登録
 - 🔀 **エンジン非依存**: コアパッケージは特定のTTSに依存せず、軽量で安定
 - 🤖 **Agent 最適化**: `TTSSkill` クラスで非同期呼び出し・パラメータ統一・Base64出力を標準提供
@@ -25,11 +46,14 @@ TTSエンジンのプラグイン化・動的発見・Agent連携を可能にす
 > 全て `uv add tts-plugin-<name>` で bridge プロジェクトに追加できます。`vox4ai list` で導入済みプラグインを確認できます。
 
 ## 📦 インストール
+
 ```bash
 uv add tts-plugin-bridge
 ```
 
-## 🧩 使い方（Python API）
+## 🛠 Usage
+
+### 🧩 Python API
 
 ```python
 from tts_plugin_bridge import TTSSkill
@@ -51,7 +75,7 @@ async with TTSSkill(default_engine="edgetts") as skill:
     )
 ```
 
-### メソッド一覧
+#### メソッド一覧
 
 | メソッド | alias | 戻り値 | 用途 |
 |----------|-------|--------|------|
@@ -62,21 +86,19 @@ async with TTSSkill(default_engine="edgetts") as skill:
 - `say()` / `play()` は Engine が `synthesize_stream()` を実装していれば ffplay でストリーミング、なければ synthesize → paplay/aplay で再生
 - Engine ごとに再生方式が異なるが、ユーザーは `say()` という同じインターフェースで使える
 
----
-
-## 🎤 vox4ai CLI
+### 🎤 vox4ai CLI
 
 `vox4ai` は `tts-plugin-bridge` に同梱される統合TTS操作コマンドです。
 サブコマンドで直感的に操作できます。
 
-```
+```bash
 vox4ai say "こんにちは"
 vox4ai save "こんにちは" -o output.wav
 vox4ai list
 vox4ai test -e aivisspeech
 ```
 
-### グローバルオプション
+#### グローバルオプション
 
 ```bash
 vox4ai --commands              # 利用可能なサブコマンド一覧
@@ -89,9 +111,9 @@ vox4ai --tts-plugin-list       # TTS Engine 一覧（listと同じ）
 - 登録TTSプラグイン一覧
 - Python パッケージ導入状況
 
-### サブコマンド
+#### サブコマンド
 
-#### `say` — テキストを読み上げる（ストリーミング再生優先）
+##### `say` — テキストを読み上げる（ストリーミング再生優先）
 
 ```bash
 vox4ai say "こんにちは"                        # デフォルトエンジン
@@ -104,7 +126,7 @@ vox4ai say "Hello" -e edgetts                 # 話速・声指定
   --model en-US-AndrewNeural
 ```
 
-#### `save` — テキストを音声ファイルに保存
+##### `save` — テキストを音声ファイルに保存
 
 ```bash
 vox4ai save "こんにちは" -o hello.wav           # WAV保存
@@ -116,13 +138,13 @@ vox4ai save "こんにちは" -e aivisspeech          # AivisSpeech
 vox4ai save "こんにちは" --play                 # 保存後に再生
 ```
 
-#### `list` — 利用可能なTTSプラグイン一覧
+##### `list` — 利用可能なTTSプラグイン一覧
 
 ```bash
 vox4ai list
 ```
 
-#### `test` — TTSエンジン接続テスト
+##### `test` — TTSエンジン接続テスト
 
 ```bash
 vox4ai test -e edgetts
@@ -138,10 +160,11 @@ vox4ai save --help       # save サブコマンドのヘルプ
 ```
 
 ## 🔧 プラグイン開発者向け
+
 独自のTTSエンジンをプラグイン化するには、`pyproject.toml` にエントリーポイントを定義するだけです。
 詳細は各プラグインリポジトリのドキュメントを参照してください。
 
-## 検証環境
+## 🔍 検証環境
 
 - **OS**: Windows 11 + WSL2 (Ubuntu)
 - **確認日**: 2026-05-09
@@ -151,4 +174,5 @@ vox4ai save --help       # save サブコマンドのヘルプ
   - 全ユニットテストパス: bridge 11件, aivisspeech 16件, edgetts 22件
 
 ## 📜 ライセンス
+
 MIT License
