@@ -35,3 +35,32 @@ def test_factory_registration():
 def test_factory_not_found():
     with pytest.raises(ValueError, match="Plugin 'invalid' not found"):
         ConnectorFactory.create("invalid")
+
+
+def test_factory_case_insensitive():
+    ConnectorFactory._registry["mock"] = MockConnector
+    connector = ConnectorFactory.create("Mock")
+    assert isinstance(connector, MockConnector)
+
+
+def test_factory_duplicate_skip():
+    ConnectorFactory._registry.clear()
+    ConnectorFactory._discovered = False
+
+    # Register first
+    ConnectorFactory._registry["mock"] = MockConnector
+    # Register again — should warn but not raise
+    old_len = len(ConnectorFactory._registry)
+    ConnectorFactory._registry["mock"] = MockConnector
+    assert len(ConnectorFactory._registry) == old_len
+
+
+def test_factory_create_with_kwargs():
+    class ConnectorWithArgs(MockConnector):
+        def __init__(self, **kwargs):
+            self.received = kwargs
+
+    ConnectorFactory._registry["withargs"] = ConnectorWithArgs
+    conn = ConnectorFactory.create("withargs", server_url="http://test", timeout=10)
+    assert conn.received["server_url"] == "http://test"
+    assert conn.received["timeout"] == 10

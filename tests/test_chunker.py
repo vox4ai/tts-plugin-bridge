@@ -29,6 +29,11 @@ def test_sentence_chunker():
     assert len(chunks) == 1
     assert chunks[0].text == "こんにちは元気ですか"
 
+    # 1文字テキスト
+    chunks = chunker.chunk("あ", config)
+    assert len(chunks) == 1
+    assert chunks[0].text == "あ"
+
 
 def test_character_count_chunker():
     chunker = CharacterCountChunker()
@@ -37,16 +42,28 @@ def test_character_count_chunker():
     # 基本的な分割
     text = "あいうえおかきくけこ"
     chunks = chunker.chunk(text, config)
-    assert len(chunks) == 2  # "あいうえお", "かきくけこ" は 5文字ずつ
-    # 実際には 5, 5 で分割されるはず
+    assert len(chunks) == 2
     assert chunks[0].text == "あいうえお"
     assert chunks[1].text == "かきくけこ"
 
-    # 境界値
+    # 境界値: ちょうどmax_chars
     text = "abcde"
     chunks = chunker.chunk(text, config)
     assert len(chunks) == 1
     assert chunks[0].text == "abcde"
+
+    # 1文字テキスト
+    chunks = chunker.chunk("あ", config)
+    assert len(chunks) == 1
+    assert chunks[0].text == "あ"
+
+    # max_chars=1
+    config1 = ChunkConfig(strategy=ChunkStrategy.CHARACTER_COUNT, max_chars=1)
+    chunks = chunker.chunk("abc", config1)
+    assert len(chunks) == 3
+    assert chunks[0].text == "a"
+    assert chunks[1].text == "b"
+    assert chunks[2].text == "c"
 
 
 def test_hybrid_chunker():
@@ -63,7 +80,6 @@ def test_hybrid_chunker():
     config = ChunkConfig(strategy=ChunkStrategy.HYBRID, max_chars=10)
     text = "これは非常に長い文章なので、途中で切れるはずです。"
     chunks = chunker.chunk(text, config)
-    # "これは非常に長い文章なので、" (13文字) -> 10文字で切る
     assert any(c.is_partial for c in chunks)
     assert chunks[0].char_count <= 10
 
@@ -72,6 +88,14 @@ def test_hybrid_chunker():
     chunks = chunker.chunk(text, config)
     assert len(chunks) > 1
     assert any(c.is_partial for c in chunks)
+
+    # 空テキスト
+    assert chunker.chunk("", config) == []
+
+    # 1文字テキスト
+    chunks = chunker.chunk("あ", config)
+    assert len(chunks) == 1
+    assert chunks[0].text == "あ"
 
 
 def test_pause_marker_chunker():
@@ -82,7 +106,6 @@ def test_pause_marker_chunker():
     text = "本日は、晴天なり。明日は、雨でしょう。"
     chunks = chunker.chunk(text, config)
     assert len(chunks) >= 2
-    # 読点の位置で分割され、min_chars 未満はマージ
     assert all(len(c.text) >= 5 for c in chunks)
     assert (
         chunks[0].text == "本日は、晴天なり。明日は、雨でしょう。"
@@ -109,6 +132,13 @@ def test_pause_marker_chunker():
     text = "a、b、c、d"
     chunks = chunker.chunk(text, config2)
     assert all(len(c.text) >= 3 for c in chunks)
+
+    # min_chars=0 (最小マージなし)
+    config3 = ChunkConfig(strategy=ChunkStrategy.PAUSE_MARKERS, min_chars=0)
+    text = "A、B、C"
+    chunks = chunker.chunk(text, config3)
+    # 読点区切りで各1文字 → min_chars=0なので分割される
+    assert chunks[0].text == "A"
 
 
 if __name__ == "__main__":
