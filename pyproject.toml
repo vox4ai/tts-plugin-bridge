@@ -22,8 +22,18 @@ tts-plugin-bridge = "tts_plugin_bridge.skill:main"
 dev = [
     "pytest>=9.0.3",
     "pytest-asyncio>=1.3.0",
+    "pytest-cov>=6.0.0",
     "ruff>=0.15.12",
 ]
+
+[tool.coverage.run]
+source = ["tts_plugin_bridge"]
+branch = true
+omit = ["*/tests/*", "*/__pycache__/*"]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 50
 
 [tool.uv.sources]
 vox4ai = { path = "../vox4ai", editable = true }
