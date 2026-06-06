@@ -14,7 +14,7 @@ dependencies = [
 readme = "README.md"
 license = {text = "MIT"}
 authors = [
-    {name = "vox4ai", email = "vox4ai@example.com"},
+    {name = "utenadev", email = "utena.cross+pypi@gmail.com"},
 ]
 keywords = ["tts", "tts-plugin", "plugin-system", "voice", "speech", "synthesis", "agent-skill"]
 classifiers = [
