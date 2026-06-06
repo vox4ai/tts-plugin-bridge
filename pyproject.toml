@@ -14,6 +14,29 @@ dependencies = [
 ]
 readme = "README.md"
 license = {text = "MIT"}
+authors = [
+    {name = "vox4ai", email = "vox4ai@example.com"},
+]
+keywords = ["tts", "tts-plugin", "plugin-system", "voice", "speech", "synthesis", "agent-skill"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Multimedia :: Sound/Audio :: Speech",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+[project.urls]
+Homepage = "https://github.com/vox4ai/tts-plugin-bridge"
+Repository = "https://github.com/vox4ai/tts-plugin-bridge"
+Issues = "https://github.com/vox4ai/tts-plugin-bridge/issues"
 
 [project.scripts]
 tts-plugin-bridge = "tts_plugin_bridge.skill:main"
@@ -24,6 +47,8 @@ dev = [
     "pytest-asyncio>=1.3.0",
     "pytest-cov>=6.0.0",
     "ruff>=0.15.12",
+    "build>=1.0",
+    "twine>=6.0",
 ]
 
 [tool.coverage.run]
@@ -36,7 +61,6 @@ show_missing = true
 fail_under = 50
 
 [tool.uv.sources]
-vox4ai = { path = "../vox4ai", editable = true }
 vox4ai-skill-lib = { path = "../vox4ai-skill-lib", editable = true }
 
 
