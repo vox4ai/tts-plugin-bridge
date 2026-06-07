@@ -28,7 +28,7 @@ TTSエンジンのプラグイン化・動的発見・Agent連携を可能にす
 - 🔀 **エンジン非依存**: コアパッケージは特定のTTSに依存せず、軽量で安定
 - 🤖 **Agent 最適化**: `TTSSkill` クラスで非同期呼び出し・パラメータ統一・Base64出力を標準提供
 - 🛡️ **型安全**: Pydantic ベースのリクエスト/レスポンスでバリデーション自動実行
-- 🎤 **vox4ai CLI**: 統一インターフェースの `vox4ai` コマンドを同梱（say/save/list/test + 環境診断）
+- 🎤 **vox4ai CLI**: 独立した [vox4ai パッケージ](https://pypi.org/project/vox4ai/) として公開。`pip install vox4ai` で利用可能（say/save/list/test + 環境診断）
 
 ## 🧩 TTS Engine プラグイン
 
@@ -88,10 +88,11 @@ async with TTSSkill(default_engine="edgetts") as skill:
 
 ### 🎤 vox4ai CLI
 
-`vox4ai` は `tts-plugin-bridge` に同梱される統合TTS操作コマンドです。
-サブコマンドで直感的に操作できます。
+`vox4ai` は [独立したパッケージ](https://pypi.org/project/vox4ai/) として公開されています。
+`tts-plugin-bridge` の `TTSSkill` を CLI から利用できるようにしたラッパーで、サブコマンドで直感的に操作できます。
 
 ```bash
+pip install vox4ai
 vox4ai say "こんにちは"
 vox4ai save "こんにちは" -o output.wav
 vox4ai list
